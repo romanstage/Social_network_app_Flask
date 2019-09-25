@@ -83,6 +83,11 @@ div.panel-body {
 .big {
     font-size: 20px;
 }
+
+.btn-danger:active:focus,.btn:active:focus,.btn-block:active:focus {
+    color:#ffffff;background-color:#034efc;border-color:#034efc
+}
+
 .mid {
     font-size: 16px;
 }
@@ -122,6 +127,8 @@ div.thumbnail {
 .thumbnail-q {
     box-shadow: 0 0 0 0 !important;
 }
+
+
 ul.summary {
     list-style-type: none;
     text-align: center;
@@ -154,7 +161,7 @@ footer {
     font-size: 30px;
     font-weight: 400;
     font-style: italic;
-    color: rgba(255, 165, 0, .7) <!-- не очень популярная соц сеть -->
+    color: #0390fc /* слоган */
 }
 .reg-page-banner {
     height: 150px !important;
