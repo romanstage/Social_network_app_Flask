@@ -40,7 +40,7 @@
 					<ul class="nav navbar-nav navbar-right">
 						<li class="active"><a href="{{url_for('timeline')}}">Лента</a></li>
 						<li class=""><a href="{{url_for('profile')}}">Мой профиль</a></li>
-						<li class=""><a href="">Выйти</a></li>
+						<li class=""><a href="{{url_for('logout')}}">Выйти</a></li>
 					</ul>
 				</div>
 			</div>
@@ -57,14 +57,14 @@
 						<div class="panel-body">
 							<div class="row pad">
 								<div class="col-lg-12">
-									<img src="{{url_for('static', filename='imgs/anonymous.png')}}" class="img-responsive img-circle center-block" alt="Image" />
+									<img src="{{ current_user.image }}" class="img-responsive img-circle center-block" alt="Image" />
 								</div>
 							</div>
 							<div class="row pad">
 								<div class="col-lg-4 col-lg-offset-2 text-center">
 									<strong>
 										Посты <br />
-										56 
+										{{ total_tweets }}
 									</strong> 
 								</div>
 								<div class="col-lg-4 text-center">

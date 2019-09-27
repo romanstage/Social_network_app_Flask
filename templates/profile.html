@@ -71,12 +71,12 @@
 								<strong class="pull-right"><em>@{{ current_user.username }}</em></strong>
 							</li>
 							<li class="list-group-item">
-								<i class="glyphicon glyphicon-calendar"></i> MEMBER SINCE:
-								<strong class="pull-right">{{ current_user.join_date.strftime('%B %d, %Y') }}</strong>
+								<i class="glyphicon glyphicon-calendar"></i> Дата регистрации:
+								<strong class="pull-right">{{ current_user.join_date.strftime(' %d / %m / %Y') }}</strong>
 							</li>
 							<li class="list-group-item">
 								<i class="glyphicon glyphicon-th-list"></i> Количество подписчиков:
-								<strong class="pull-right">300</strong>
+								<strong class="pull-right">{{ followed_by | length }}</strong>
 							</li>
 						</ul>
 					</div>
@@ -90,101 +90,63 @@
 
 								<ul class="nav nav-tabs" role="tablist">
 									<li role="presentation" class="active">
-										<a href="#tweets" aria-controls="tweets" role="tab" data-toggle="tab">Записи &amp; Ответы</a>
+										<a href="#tweets" aria-controls="tweets" role="tab" data-toggle="tab">Посты &amp; Ответы</a>
 									</li>
 									<li role="presentation">
 										<a href="#followings" aria-controls="followings" role="tab" data-toggle="tab">Подписчики</a>
 									</li>
 								</ul>
 							
-
+                                <!-- вкладки "Активность" -->
 								<div class="tab-content">
 									<div role="tabpanel" class="tab-pane active" id="tweets">
-										<div class="row">
-											<div class="col-lg-12">
-												<div class="row pad">
-													<div class="col-lg-2">
-														<img src="{{url_for('static', filename='imgs/anonymous.png')}}" class="img-circle" style="width: 60px; height: 60px;" />
-													</div>
-													<div class="col-lg-10">
-														<div>
-															<strong class="mid">Александр Друзь</strong>
-															<small><em>@hussleking</em></small> .
-															July 5
-														</div>
-														<div class="pad">
-															Хотел как лучше, а получилось ..<a href="#">#hussleordie</a> как всегда.
-														</div>
-													</div>
-												</div>
-											</div>
-										</div>
-										<div class="row">
-											<div class="col-lg-12">
-												<div class="row pad">
-													<div class="col-lg-2">
-														<img src="{{url_for('static', filename='imgs/anonymous.png')}}" class="img-circle" style="width: 60px; height: 60px;" />
-													</div>
-													<div class="col-lg-10">
-														<div>
-															<strong class="mid">Алесь Мухин</strong>
-															<small><em>@potatoman</em></small> .
-															July 5
-														</div>
-														<div class="pad">
-															<a href="#">#potateforall</a> party is officially on!!!
-														</div>
-													</div>
-												</div>
-											</div>
-										</div>
+										{% for tweet in tweets %}
+                                            <div class="row">
+                                                <div class="col-lg-12">
+                                                    <div class="row pad">
+                                                        <div class="col-lg-2">
+                                                            <img src="{{ tweet.user.image }}" class="img-circle" style="width: 60px; height: 60px;" />
+                                                        </div>
+                                                        <div class="col-lg-10">
+                                                            <div>
+                                                                <strong class="mid">{{ tweet.user.name }}</strong>
+                                                                <small><em>@{{ tweet.user.username }}</em></small> .
+                                                                {{ (current_time - tweet.date_created)|time_since }}
+                                                            </div>
+                                                            <div class="pad">
+                                                                {{ tweet.text }}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+										{% endfor %}
 									</div>
 									<div role="tabpanel" class="tab-pane" id="followings">
-										<div class="row">
-											<div class="col-lg-12">
-												<div class="row pad">
-													<div class="col-lg-2">
-														<img src="{{ url_for('static', filename='imgs/anonymous.png') }}" class="img-circle" style="width: 60px; height: 60px;" />
-													</div>
-													<div class="col-lg-10">
-														<div>
-															<strong class="mid">Иван Ургант</strong>
-															<small><em>@ivannotdrage</em></small>
-														</div>
-														<div class="row pad">
-															<hr />
-															<div class="col-lg-12">
-																<i class="glyphicon glyphicon-th-list"></i> 300,000
-																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-															</div>
-														</div>
-													</div>
-												</div>
-											</div>
-										</div>
-										<div class="row">
-											<div class="col-lg-12">
-												<div class="row pad">
-													<div class="col-lg-2">
-														<img src="{{ url_for('static', filename='imgs/anonymous.png') }}" class="img-circle" style="width: 60px; height: 60px;" />
-													</div>
-													<div class="col-lg-10">
-														<div>
-															<strong class="mid">Nick Fury</strong>
-															<small><em>@bestenglishtutor</em></small>
-														</div>
-														<div class="row pad">
-															<hr />
-															<div class="col-lg-12">
-																<i class="glyphicon glyphicon-th-list"></i> 195,565
-																&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-															</div>
-														</div>
-													</div>
-												</div>
-											</div>
-										</div>
-
+									    {% for follower in followed_by %}
+                                            <div class="row">
+                                                <div class="col-lg-12">
+                                                    <div class="row pad">
+                                                        <div class="col-lg-2">
+                                                            <img src="{{ follower.image }}" class="img-circle" style="width: 60px; height: 60px;" />
+                                                        </div>
+                                                        <div class="col-lg-10">
+                                                            <div>
+                                                                <strong class="mid">{{ follower.name }}</strong>
+                                                                <small><em>@{{ follower.username }}</em></small>
+                                                            </div>
+                                                            <div class="row pad">
+                                                                <hr />
+                                                                <div class="col-lg-12">
+                                                                    <i class="glyphicon glyphicon-th-list"></i> {{ follower.followed_by.all()|length }}
+                                                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+										{% endfor %}
 									</div>
 								</div>
 							</div>
