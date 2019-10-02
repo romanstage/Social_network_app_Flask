@@ -1,5 +1,5 @@
 from app import app, photos, db
-from models import User, Tweet
+from models import User, Tweet, followers
 from forms import RegisterForm, LoginForm, TweetForm
 from flask import render_template, redirect, url_for, request, abort
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -14,7 +14,7 @@ def index():
     if form.validate_on_submit():
         return f"<h1>Username: {form.username.data}, Password: {form.password.data}, Remember: {form.remember.data}</h1>"
 
-    return render_template('index.html', form=form)
+    return render_template('index.html', form=form, logged_in_user=current_user)
 
 
 @app.route('/login', methods=['GET','POST'])
@@ -28,7 +28,7 @@ def login():
         user = User.query.filter_by(username=form.username.data).first()
 
         if not user:
-            return render_template('index.html',form=form,
+            return render_template('index.html', form=form,
                                    message='Проверьте правильность ввода имени пользователя или пароля')
 
         if check_password_hash(user.password, form.password.data):
@@ -37,10 +37,12 @@ def login():
             return redirect(url_for('profile'))
 
         return render_template('index.html', form=form,
-                                   message='Проверьте правильность ввода имени пользователя или пароля')
+                               message='Проверьте правильность ввода имени пользователя или пароля')
 
     return render_template('index.html', form=form)
 
+def who_to_watch_list(user):
+    return User.query.filter(User.id != user.id).order_by(db.func.random()).limit(4).all()
 
 @app.route('/profile', defaults={'username': None})
 @app.route('/profile/<username>')
@@ -50,8 +52,6 @@ def profile(username):
         user = User.query.filter_by(username=username).first()
         if not user:
             abort(404)
-
-
     else:
         user = current_user
 
@@ -61,43 +61,58 @@ def profile(username):
 
     followed_by = user.followed_by.all()
 
-    return render_template('profile.html', current_user=user, tweets=tweets, current_time=current_time,followed_by=followed_by)
+    #Показ "Подписаться"
+    display_follow = True
+    if current_user == user:
+        display_follow = False
+    elif current_user in followed_by:
+        display_follow = False
 
-@app.route('/logout')
-@login_required
-def logout():
-    logout_user()
-    return redirect(url_for('index'))
+    who_to_watch = who_to_watch_list(user)
 
-@app.route('/timeline/', defaults={'username' : None})
-@app.route('/timeline/<username>')
+    return render_template('profile.html', current_user=user, tweets=tweets, current_time=current_time,
+                           followed_by=followed_by, display_follow=display_follow, who_to_watch=who_to_watch,
+                           logged_in_user=current_user)
 
 @app.route('/timeline', defaults={'username' : None})
 @app.route('/timeline/<username>')
 def timeline(username):
     form = TweetForm()
 
-    if username:            #чужая страница
+    if username: #промотр чужой страницы
         user = User.query.filter_by(username=username).first()
         if not user:
             abort(404)
 
-    else:                   #своя страница
-        user = current_user
+        # собственные посты пользователя на его странице
+        tweets = Tweet.query.filter_by(user=user).order_by(Tweet.date_created.desc()).all()
+        total_tweets = len(tweets)
 
-    tweets = Tweet.query.filter_by(user=user).order_by(Tweet.date_created.desc()).all()
-    total_tweets = len(tweets)
+    else: #просмотр своей страница
+        user = current_user
+        #посты всех пользователей, на которые подписан текущий пользователь
+        tweets = Tweet.query.join(followers, (followers.c.followee_id == Tweet.user_id)).filter(
+            followers.c.follower_id == current_user.id).order_by(Tweet.date_created.desc()).all()
+
+        # количество собественных постов текущего пользователя
+        total_tweets = Tweet.query.filter_by(user=user).order_by(Tweet.date_created.desc()).count()
 
     current_time = datetime.now()
 
-    return render_template('timeline.html',form=form,tweets=tweets,current_time=current_time,current_user=user,total_tweets=total_tweets)
+    followed_by_count = user.followed_by.count()
+
+    who_to_watch = who_to_watch_list(user)
+
+    return render_template('timeline.html', form=form, tweets=tweets, current_time=current_time, current_user=user,
+                           total_tweets=total_tweets, who_to_watch=who_to_watch, logged_in_user=current_user,
+                           followed_by_count=followed_by_count)
 
 @app.route('/post_tweet',methods=['POST'])
 @login_required
 def post_tweet():
     form = TweetForm()
     if form.validate():
-        tweet=Tweet(user_id=current_user.id,text=form.text.data,date_created=datetime.now())
+        tweet = Tweet(user_id=current_user.id, text=form.text.data, date_created=datetime.now())
         db.session.add(tweet)
         db.session.commit()
         return redirect(url_for('timeline'))
@@ -112,7 +127,8 @@ def register():
         image_filename = photos.save(form.image.data)
         image_url = photos.url(image_filename)
 
-        new_user = User(name=form.name.data, username=form.username.data, image=image_url, password=generate_password_hash(form.password.data), join_date=datetime.now())
+        new_user = User(name=form.name.data, username=form.username.data, image=image_url,
+                        password=generate_password_hash(form.password.data), join_date=datetime.now())
         db.session.add(new_user)
         db.session.commit()
 
@@ -121,6 +137,13 @@ def register():
         return redirect(url_for('profile'))
 
     return render_template('register.html', form=form)
+
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
 
 
 @app.route('/follow/<username>')

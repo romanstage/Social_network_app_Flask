@@ -1,115 +1,55 @@
-<!DOCTYPE html>
-<html lang="en">
-	<head>
-		<meta charset="utf-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge">
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Главная | Включайся!</title>
+{% extends "base.html" %}
+{% block content %}
+    <div class="modal-header"><h1>Добро пожаловать во Включайся!</h1></div>
+    <div class="modal fade" id="login">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                    <h4 class="modal-title">Вход</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-lg-6 col-lg-offset-3">
+                            <div class="text-center">
+                                <h3>
+                                    <a href="./">Включайся!</a>
+                                </h3>
+                            </div>
+                                <form method="POST" action="{{url_for('login')}}">
+                                {% if message %}
+                                    <span style="color:red;">{{message}}</span>
+                                {% endif %}
+                                {{ form.csrf_token }}
+                                <div class="form-group">
+                                    {{ form.username(class="form-control", placeholder="Имя пользователя") }}
+                                    {% for error in form.password.errors %}
+                                        <li style="color:red;">{{error}}</li>
+                                    {% endfor %}
+                                </div>
+                                <div class="form-group">
+                                    {{ form.password(class="form-control", placeholder="Пароль") }}
+                                    {% for error in form.password.errors %}
+                                        <li style="color:red;">{{error}}</li>
+                                    {% endfor %}
+                                </div>
+                                <div class="form-group">
+                                    <div class="checkbox-inline">
+                                        <label>
+                                            {{ form.remember }}
+                                            Запомнить меня
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-danger btn-block">Вход</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-		<!-- Bootstrap CSS -->
-		<link rel="stylesheet" href="{{url_for('static',filename='bs/css/united.min.css')}}">
-		<link rel="stylesheet" href="{{url_for('static',filename='css/styles.css') }}">
-	</head>
-	<body>
-
-		<div class="container-fluid">
-			<div class="row" id="banner">
-				<div class="title col-lg-12">
-					<p class="title">
-						<a href="./">Включайся!</a>
-					</p>
-					<p class="subtitle">... любимая социальная сеть сына маминой подруги</p>
-				</div>
-			</div>
-		</div>
-
-		<nav class="navbar navbar-default" role="navigation">
-			<div class="container-fluid">
-				<div class="navbar-header">
-					<button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
-						<span class="sr-only">Переключатель навигации</span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-						<span class="icon-bar"></span>
-					</button>
-					<a class="navbar-brand" href="./">Включайся!</a>
-				</div>
-		
-
-				<div class="collapse navbar-collapse navbar-ex1-collapse">
-					<ul class="nav navbar-nav navbar-right">
-						<li class=""><a href="{{ url_for('register')}}">Регистрация</a></li>
-						<li class=""><a href="#login" data-toggle="modal" data-keyboard="false">Вход</a></li>
-					</ul>
-				</div>
-			</div>
-		</nav>
-
-		<div class="container">
-
-			<div class="modal fade" id="login">
-				<div class="modal-dialog">
-					<div class="modal-content">
-						<div class="modal-header">
-							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-							<h4 class="modal-title">Вход</h4>
-						</div>
-						<div class="modal-body">
-							<div class="row">
-								<div class="col-lg-6 col-lg-offset-3">
-									<div class="text-center">
-										<h3>
-											<a href="./">Включайся!</a>
-										</h3>
-									</div>
-                                        <form method="POST" action="{{url_for('login')}}">
-                                        {% if message %}
-                                            <span style="color:red;">{{message}}</span>
-                                        {% endif %}
-                                        {{ form.csrf_token }}
-                                        <div class="form-group">
-                                            {{ form.username(class="form-control", placeholder="Имя пользователя") }}
-                                            {% for error in form.password.errors %}
-					                            <li style="color:red;">{{error}}</li>
-					                        {% endfor %}
-                                        </div>
-                                        <div class="form-group">
-                                            {{ form.password(class="form-control", placeholder="Пароль") }}
-                                            {% for error in form.password.errors %}
-					                            <li style="color:red;">{{error}}</li>
-					                        {% endfor %}
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="checkbox-inline">
-                                                <label>
-                                                    {{ form.remember }}
-                                                    Запомнить меня
-                                                </label>
-                                            </div>
-                                        </div>
-                                        <div class="form-group">
-                                            <button type="submit" class="btn btn-danger btn-block">Вход</button>
-                                        </div>
-									</form>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<footer>
-				<div class="row pad">
-					<div class="col-lg-12 text-center">
-						Все права защищены &copy; 2019 <strong> <a href="./">Включайся!</a></strong>
-					</div>
-				</div>
-			</footer>
-		</div>
-
-		<!-- jQuery -->
-		<script src="{{ url_for('static', filename='bs/js/jquery.min.js') }}"></script>
-		<!-- Bootstrap JavaScript -->
-		<script src="{{ url_for('static', filename='bs/js/bootstrap.min.js') }}"></script>
-	</body>
-</html>
+{% endblock %}
